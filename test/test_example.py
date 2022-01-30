@@ -43,6 +43,12 @@ class TestExample(DbTest):
         )
 
         sql = """
+        SELECT count(sub_org.sales_organization_id) as subordinates_count, org.id
+            FROM organizations as org
+            LEFT JOIN enterprise_sales_enterprise_customers as sub_org
+            ON org.id = sub_org.sales_organization_id
+            GROUP BY org.id
+            ORDER BY org.id asc;
         """
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(sql)
@@ -88,6 +94,7 @@ class TestExample(DbTest):
         )
 
         sql = """
+        SELECT id, ST_X(ST_Centroid(bounds)) as longitude, ST_Y(ST_Centroid(bounds)) as latitude FROM japan_segments;
         """
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(sql)
@@ -155,6 +162,13 @@ class TestExample(DbTest):
         )
 
         sql = """
+        SELECT id
+            FROM japan_segments
+            WHERE bounds && ST_MakeEnvelope (
+                130.27313232421875, 30.519681272749402, -- bounding
+                131.02020263671875, 30.80909017893796, -- box limits
+                4326
+            )
         """
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(sql)
